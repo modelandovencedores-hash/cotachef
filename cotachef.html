@@ -30,6 +30,29 @@
       --radius-lg:    20px;
     }
 
+    /* ─── Light Theme ────────────────────────────────────────────── */
+    html.light {
+      --bg:           #FAF7F2;
+      --bg-surface:   #F2EDE4;
+      --bg-elevated:  #FFFFFF;
+      --text-1:       #1A1410;
+      --text-2:       #6B5E4E;
+      --text-3:       #A8957E;
+      --gold:         #A8720E;
+      --gold-light:   #C9953A;
+      --gold-dim:     rgba(168,114,14,.1);
+      --green:        #177A48;
+      --green-dim:    rgba(23,122,72,.1);
+      --border:       rgba(26,20,16,.1);
+      --border-gold:  rgba(168,114,14,.3);
+    }
+
+    /* Smooth theme transition */
+    body, nav, .stats, .section, footer,
+    .pain-card, .benefit, .testi, .plan, .faq-item, .faq-q {
+      transition: background-color .3s ease, border-color .3s ease, color .3s ease;
+    }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
 
@@ -112,6 +135,9 @@
       border-color: var(--border);
       backdrop-filter: blur(16px);
     }
+    html.light nav.scrolled {
+      background: rgba(250,247,242,.97);
+    }
     .nav-inner {
       max-width: 1240px;
       margin: 0 auto;
@@ -159,6 +185,35 @@
       background: var(--gold-light) !important;
       transform: translateY(-1px);
     }
+
+    /* ─── Theme Toggle ───────────────────────────────────────────── */
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 3px;
+      gap: 2px;
+      cursor: pointer;
+      transition: border-color .2s;
+    }
+    .theme-toggle:hover { border-color: var(--border-gold); }
+
+    .theme-opt {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px; height: 28px;
+      border-radius: 100px;
+      font-size: .85rem;
+      transition: background .25s, transform .2s;
+      user-select: none;
+    }
+    .theme-opt.active {
+      background: var(--gold-dim);
+    }
+    .theme-opt:hover:not(.active) { transform: scale(1.15); }
 
     .nav-hamburger {
       display: none;
@@ -753,6 +808,12 @@
         0 0 0 1px rgba(201,149,58,.1),
         0 36px 80px rgba(0,0,0,.35);
     }
+    html.light .plan.featured {
+      background: linear-gradient(145deg, #FFF8EC, #FFF3D6);
+      box-shadow:
+        0 0 0 1px rgba(168,114,14,.12),
+        0 36px 80px rgba(168,114,14,.12);
+    }
 
     .plan-badge {
       position: absolute;
@@ -1032,8 +1093,14 @@
       <li><a href="#planos">Planos</a></li>
       <li><a href="#planos" class="nav-cta">Assinar agora</a></li>
     </ul>
-    <div class="nav-hamburger" onclick="toggleMenu()">
-      <span></span><span></span><span></span>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Alternar tema" role="button" aria-label="Alternar entre modo escuro e claro">
+        <div class="theme-opt active" id="optDark" title="Modo escuro">🌙</div>
+        <div class="theme-opt" id="optLight" title="Modo claro">☀️</div>
+      </div>
+      <div class="nav-hamburger" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+      </div>
     </div>
   </div>
 </nav>
@@ -1513,6 +1580,31 @@
 
 <!-- ─── JS ────────────────────────────────────────────────────────── -->
 <script>
+  /* ── Theme Toggle ── */
+  const html      = document.documentElement;
+  const optDark   = document.getElementById('optDark');
+  const optLight  = document.getElementById('optLight');
+
+  function applyTheme(theme) {
+    if (theme === 'light') {
+      html.classList.add('light');
+      optDark.classList.remove('active');
+      optLight.classList.add('active');
+    } else {
+      html.classList.remove('light');
+      optDark.classList.add('active');
+      optLight.classList.remove('active');
+    }
+    localStorage.setItem('cc-theme', theme);
+  }
+
+  function toggleTheme() {
+    applyTheme(html.classList.contains('light') ? 'dark' : 'light');
+  }
+
+  /* Restore saved preference */
+  applyTheme(localStorage.getItem('cc-theme') || 'dark');
+
   /* Nav scroll */
   const nav = document.getElementById('nav');
   window.addEventListener('scroll', () => {
@@ -1540,6 +1632,7 @@
     if (links.style.display === 'flex') {
       links.style.display = '';
     } else {
+      const isLight = document.documentElement.classList.contains('light');
       Object.assign(links.style, {
         display: 'flex',
         flexDirection: 'column',
@@ -1547,9 +1640,9 @@
         top: '68px',
         left: '0',
         right: '0',
-        background: 'rgba(13,11,9,.97)',
+        background: isLight ? 'rgba(250,247,242,.98)' : 'rgba(13,11,9,.97)',
         padding: '24px 5%',
-        borderBottom: '1px solid rgba(244,237,224,.07)',
+        borderBottom: '1px solid var(--border)',
         gap: '18px',
         zIndex: '799'
       });
